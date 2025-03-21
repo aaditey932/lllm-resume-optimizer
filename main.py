@@ -15,6 +15,14 @@ import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 
+# Download necessary NLTK data
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('wordnet')
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
+
+
 # Import torch conditionally to avoid Streamlit watcher issues
 try:
     import torch
@@ -22,18 +30,16 @@ except RuntimeError:
     pass
 
 # Add scripts directory to path for imports
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scripts"))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scripts", "deep"))
+
+
+from scripts.deep.gpt_resume_optimizer import process_resume
 
 # Import traditional functions from the combined script
 from scripts.traditional.traditional_combined import (
     remove_markup, preprocess_text, jaccard_similarity, ngram_overlap,
     SentenceTransformer, TfidfVectorizer, CountVectorizer, cosine_similarity
 )
-
-# Download necessary NLTK data
-nltk.download('punkt')
-nltk.download('wordnet')
-nltk.download('stopwords')
 
 # Load Pretrained Job Keywords
 @st.cache_resource
@@ -96,14 +102,32 @@ def clean_text(text):
 # Function to Extract Text from Uploaded Resume
 def extract_text_from_file(uploaded_file):
     text = ""
-    if uploaded_file.type == "application/pdf":
+    # If the object has a `.type` attribute, it's likely a Streamlit upload
+    if hasattr(uploaded_file, "type"):
+        file_type = uploaded_file.type
+    else:
+        # Fallback for plain file objects: guess from extension
+        filename = getattr(uploaded_file, "name", "")
+        if filename.endswith(".pdf"):
+            file_type = "application/pdf"
+        elif filename.endswith(".docx"):
+            file_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        else:
+            file_type = "unknown"
+
+    if file_type == "application/pdf":
         pdf_reader = PyPDF2.PdfReader(uploaded_file)
         for page in pdf_reader.pages:
             text += page.extract_text() + "\n"
-    elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+
+    elif file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         doc = Document(uploaded_file)
         for para in doc.paragraphs:
             text += para.text + "\n"
+
+    else:
+        text = "❌ Unsupported file format."
+
     return text
 
 # Function to Match Resume Against Job Titles Using Keyword Overlap
@@ -235,8 +259,11 @@ if uploaded_file:
             with st.spinner("Analyzing resume against job categories..."):
                 match_results = match_resume(resume_text)
             
-            for job_title, score in match_results:
-                st.write(f"✅ **{job_title}: {score*100:.2f}% match**")
+            if match_results:
+                for job_title, score in match_results:
+                    st.write(f"✅ **{job_title}: {score*100:.2f}% match**")
+            else:
+                st.warning("No matches found based on keyword overlap.")
             
             # Traditional Approach - only if job description is provided
             if job_description:
@@ -246,48 +273,78 @@ if uploaded_file:
                     # Compute similarity metrics
                     similarity_metrics = compute_similarity_metrics(job_description, resume_text)
                 
-                # Display metrics in a table
-                st.write("**Similarity Metrics:**")
-                metrics_df = pd.DataFrame({
-                    'Metric': [
-                        'TF-IDF Cosine Similarity', 
-                        'Jaccard Similarity', 
-                        'BERT Semantic Similarity', 
-                        'N-gram Overlap'
-                    ],
-                    'Description': [
-                        'Measures content similarity based on term frequency',
-                        'Measures word overlap between job and resume',
-                        'Captures semantic meaning beyond exact word matches',
-                        'Measures phrase overlap between job and resume'
-                    ],
-                    'Score': [
-                        f"{similarity_metrics['tfidf_cosine']:.3f}",
-                        f"{similarity_metrics['jaccard']:.3f}",
-                        f"{similarity_metrics['bert_similarity']:.3f}",
-                        f"{similarity_metrics['ngram_overlap']:.3f}"
-                    ]
-                })
-                st.table(metrics_df)
-                
-                # Predict match score
-                match_scores = predict_match_score(similarity_metrics)
-                if match_scores:
-                    # GMM Model Score with description
-                    st.write("**GMM Model Score:**")
-                    st.info("analyzes your resume's similarity features and assigns a score based on clusters of labeled data")
-                    # Ensure progress value is between 0.0 and 1.0
-                    gmm_progress_value = min(max(match_scores["gmm_score"] / 100, 0.0), 1.0)
-                    st.progress(gmm_progress_value)
-                    st.write(f"{match_scores['gmm_score']:.1f}%")
+                if similarity_metrics:
+                    st.write("**Similarity Metrics:**")
+                    metrics_df = pd.DataFrame({
+                        'Metric': [
+                            'TF-IDF Cosine Similarity', 
+                            'Jaccard Similarity', 
+                            'BERT Semantic Similarity', 
+                            'N-gram Overlap'
+                        ],
+                        'Description': [
+                            'Measures content similarity based on term frequency',
+                            'Measures word overlap between job and resume',
+                            'Captures semantic meaning beyond exact word matches',
+                            'Measures phrase overlap between job and resume'
+                        ],
+                        'Score': [
+                            f"{similarity_metrics['tfidf_cosine']:.3f}",
+                            f"{similarity_metrics['jaccard']:.3f}",
+                            f"{similarity_metrics['bert_similarity']:.3f}",
+                            f"{similarity_metrics['ngram_overlap']:.3f}"
+                        ]
+                    })
+                    st.table(metrics_df)
                     
-                    # XGBoost Model Score with description
-                    st.write("**XGBoost Model Score:**")
-                    st.info("model that predicts match percentage based on the features and labels from training data")
-                    # Ensure progress value is between 0.0 and 1.0
-                    xgb_progress_value = min(max(match_scores["xgb_score"] / 100, 0.0), 1.0)
-                    st.progress(xgb_progress_value)
-                    st.write(f"{match_scores['xgb_score']:.1f}%")
+                    # Predict match score
+                    match_scores = predict_match_score(similarity_metrics)
+                    if match_scores:
+                        st.write("**GMM Model Score:**")
+                        st.info("Analyzes your resume's similarity features and assigns a score based on clusters of labeled data")
+                        gmm_progress_value = min(max(match_scores["gmm_score"] / 100, 0.0), 1.0)
+                        st.progress(gmm_progress_value)
+                        st.write(f"{match_scores['gmm_score']:.1f}%")
+                        
+                        st.write("**XGBoost Model Score:**")
+                        st.info("Model that predicts match percentage based on the features and labels from training data")
+                        xgb_progress_value = min(max(match_scores["xgb_score"] / 100, 0.0), 1.0)
+                        st.progress(xgb_progress_value)
+                        st.write(f"{match_scores['xgb_score']:.1f}%")
+                    else:
+                        st.warning("Failed to predict match scores.")
+                else:
+                    st.warning("Failed to compute similarity metrics.")
+            
+            # Deep Learning Approach - only if job description is provided
+            if job_description and process_resume:
+                st.subheader("Deep Learning Approach: Llama-Powered Resume Optimization")
+                with st.spinner("Optimizing resume using Llama..."):
+                    # Process the resume using Llama
+                    try:
+                        doc = Document(uploaded_file)  # Try opening it
+                    except Exception as e:
+                        st.error(f"❌ Error opening .docx file: {e}")
 
-
-## Above code generated using the DeepSeek & Chatgpt and then tweaked. 
+                    edited_resume_path = process_resume(uploaded_file, job_description)
+                    
+                    if edited_resume_path:
+                        st.success("Resume optimization complete!")
+                        
+                        # Display the optimized resume for download
+                        with open(edited_resume_path, "rb") as file:
+                            st.download_button(
+                                label="Download Optimized Resume",
+                                data=file,
+                                file_name="optimized_resume.docx",
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            )
+                        
+                    else:
+                        st.error("Failed to optimize the resume. Please check the input and try again.")
+            elif not process_resume:
+                st.warning("Deep Learning Approach is disabled. Ensure the Llama Resume Optimizer module is available.")
+            else:
+                st.warning("Please provide a job description to use the Deep Learning Approach.")
+    else:
+        st.error("Failed to extract text from the uploaded file.")

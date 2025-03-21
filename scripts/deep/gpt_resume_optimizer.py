@@ -3,12 +3,19 @@ import json
 import tempfile
 from docx import Document
 from openai import OpenAI
+from dotenv import load_dotenv
+from typing import Union, BinaryIO
 
+load_dotenv()
+api = os.getenv("OPENAI_API_KEY")
 # Initialize OpenAI client (ensure API key is set in environment variables)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=api)
 
 def extract_text_from_docx(docx_path):
     """Extracts text from a DOCX file."""
+    if not docx_path.endswith(".docx"):
+        raise ValueError("Invalid file format. Please upload a valid .docx file.")
+
     doc = Document(docx_path)
     return "\n".join([para.text for para in doc.paragraphs])
 
@@ -121,8 +128,9 @@ def replace_text_in_document(resume_path, output_path, edits):
 
     return output_path
 
-def process_resume(resume_file, job_description):
+def process_resume(resume_file:Union[BinaryIO], job_description:str):
     """Main function to handle resume optimization workflow."""
+    resume_file.seek(0) 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as temp_input:
         temp_input.write(resume_file.read())
         input_path = temp_input.name
