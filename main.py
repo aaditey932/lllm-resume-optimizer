@@ -10,6 +10,7 @@ import numpy as np
 import os
 import sys
 import warnings
+from scripts.deep.eval_deep_model import evaluate_resume
 
 # Silence warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -31,9 +32,9 @@ except RuntimeError:
 
 # Add scripts directory to path for imports
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "scripts", "deep"))
+ 
 
-
-from scripts.deep.gpt_resume_optimizer import process_resume
+from scripts.deep.llama_resume_optimizer import process_resume
 
 # Import traditional functions from the combined script
 from scripts.traditional.traditional_combined import (
@@ -317,34 +318,45 @@ if uploaded_file:
                     st.warning("Failed to compute similarity metrics.")
             
             # Deep Learning Approach - only if job description is provided
-            if job_description and process_resume:
-                st.subheader("Deep Learning Approach: Llama-Powered Resume Optimization")
-                with st.spinner("Optimizing resume using Llama..."):
-                    # Process the resume using Llama
-                    try:
-                        doc = Document(uploaded_file)  # Try opening it
-                    except Exception as e:
-                        st.error(f"❌ Error opening .docx file: {e}")
+if job_description and process_resume:
+    st.subheader("Deep Learning Approach: Llama-Powered Resume Optimization")
+    with st.spinner("Optimizing resume using Llama..."):
+        try:
+            doc = Document(uploaded_file)
+        except Exception as e:
+            st.error(f"❌ Error opening .docx file: {e}")
 
-                    edited_resume_path = process_resume(uploaded_file, job_description)
-                    
-                    if edited_resume_path:
-                        st.success("Resume optimization complete!")
-                        
-                        # Display the optimized resume for download
-                        with open(edited_resume_path, "rb") as file:
-                            st.download_button(
-                                label="Download Optimized Resume",
-                                data=file,
-                                file_name="optimized_resume.docx",
-                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                            )
-                        
-                    else:
-                        st.error("Failed to optimize the resume. Please check the input and try again.")
-            elif not process_resume:
-                st.warning("Deep Learning Approach is disabled. Ensure the Llama Resume Optimizer module is available.")
-            else:
-                st.warning("Please provide a job description to use the Deep Learning Approach.")
-    else:
-        st.error("Failed to extract text from the uploaded file.")
+        edited_resume_path = process_resume(uploaded_file, job_description)
+        
+        if edited_resume_path:
+            st.success("Resume optimization complete!")
+
+            # Evaluate the optimized resume
+            with st.spinner("Evaluating optimized resume..."):
+                try:
+                    # Save uploaded file to temp location
+                    temp_path = "temp_uploaded_resume.docx"
+                    with open(temp_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+
+                    # Evaluate resume using your DL-based approach
+                    deep_results = evaluate_resume(temp_path, edited_resume_path, job_description)
+
+                    st.write("### Deep Learning Evaluation Metrics")
+                    st.metric("Keyword Inclusion Score", f"{deep_results['keyword_inclusion_score']*100:.1f}%")
+                    st.metric("Semantic Similarity", f"{deep_results['semantic_similarity']:.2f}")
+
+                    os.remove(temp_path)  # Clean up temp file
+                except Exception as e:
+                    st.error(f"❌ Error during deep evaluation: {e}")
+            
+            # Download optimized resume
+            with open(edited_resume_path, "rb") as file:
+                st.download_button(
+                    label="Download Optimized Resume",
+                    data=file,
+                    file_name="optimized_resume.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )
+        else:
+            st.error("Failed to optimize the resume. Please check the input and try again.")
