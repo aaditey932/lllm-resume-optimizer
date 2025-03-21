@@ -1,3 +1,4 @@
+import streamlit as st
 import scripts.deep.gpt_resume_optimizer as st
 import pandas as pd
 import re
