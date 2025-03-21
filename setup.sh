@@ -43,10 +43,6 @@ if [[ $RUN_MODELS == "y" || $RUN_MODELS == "Y" ]]; then
     echo "Running the traditional approach..."
     python scripts/traditional/traditional_combined.py
 
-    # run the LLM approach
-    echo "Running the LLM approach..."
-    python scripts/deep/update with your file name.py
-    
     # Ask if they want to run the app
     read -p "Do you want to run the Streamlit app? (y/n): " RUN_APP
     if [[ $RUN_APP == "y" || $RUN_APP == "Y" ]]; then
