@@ -4,6 +4,10 @@ import tempfile
 from docx import Document
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
+from dotenv import load_dotenv
+
+load_dotenv()
+HF_TOKEN = os.get_env("HF_TOKEN")
 
 # Initialize the locally saved model and tokenizer
 def load_model_and_tokenizer():
@@ -20,7 +24,7 @@ def load_model_and_tokenizer():
         torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,  # Use FP16 if GPU is available
         device_map="auto",  # Automatically map the model to available devices (GPU/CPU)
         load_in_4bit=True,  # Load in 4-bit if using quantization
-        token = "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"
+        token = HF_TOKEN
     )
     
     # Enable faster inference
