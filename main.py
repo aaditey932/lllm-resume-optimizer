@@ -246,24 +246,49 @@ if uploaded_file:
                     # Compute similarity metrics
                     similarity_metrics = compute_similarity_metrics(job_description, resume_text)
                 
-                # Display metrics in a single column
+                # Display metrics in a table
                 st.write("**Similarity Metrics:**")
-                st.write(f"TF-IDF Cosine Similarity: {similarity_metrics['tfidf_cosine']:.3f}")
-                st.write(f"Jaccard Similarity: {similarity_metrics['jaccard']:.3f}")
-                st.write(f"BERT Semantic Similarity: {similarity_metrics['bert_similarity']:.3f}")
-                st.write(f"N-gram Overlap: {similarity_metrics['ngram_overlap']:.3f}")
+                metrics_df = pd.DataFrame({
+                    'Metric': [
+                        'TF-IDF Cosine Similarity', 
+                        'Jaccard Similarity', 
+                        'BERT Semantic Similarity', 
+                        'N-gram Overlap'
+                    ],
+                    'Description': [
+                        'Measures content similarity based on term frequency',
+                        'Measures word overlap between job and resume',
+                        'Captures semantic meaning beyond exact word matches',
+                        'Measures phrase overlap between job and resume'
+                    ],
+                    'Score': [
+                        f"{similarity_metrics['tfidf_cosine']:.3f}",
+                        f"{similarity_metrics['jaccard']:.3f}",
+                        f"{similarity_metrics['bert_similarity']:.3f}",
+                        f"{similarity_metrics['ngram_overlap']:.3f}"
+                    ]
+                })
+                st.table(metrics_df)
                 
                 # Predict match score
                 match_scores = predict_match_score(similarity_metrics)
                 if match_scores:
-                    # Display individual model scores with separate progress bars
+                    # GMM Model Score with description
                     st.write("**GMM Model Score:**")
-                    st.progress(match_scores["gmm_score"] / 100)
+                    st.info("analyzes your resume's similarity features and assigns a score based on clusters of labeled data")
+                    # Ensure progress value is between 0.0 and 1.0
+                    gmm_progress_value = min(max(match_scores["gmm_score"] / 100, 0.0), 1.0)
+                    st.progress(gmm_progress_value)
                     st.write(f"{match_scores['gmm_score']:.1f}%")
                     
+                    # XGBoost Model Score with description
                     st.write("**XGBoost Model Score:**")
-                    st.progress(match_scores["xgb_score"] / 100)
+                    st.info("model that predicts match percentage based on the features and labels from training data")
+                    # Ensure progress value is between 0.0 and 1.0
+                    xgb_progress_value = min(max(match_scores["xgb_score"] / 100, 0.0), 1.0)
+                    st.progress(xgb_progress_value)
                     st.write(f"{match_scores['xgb_score']:.1f}%")
 
 
 ## Above code generated using the DeepSeek & Chatgpt and then tweaked
+
