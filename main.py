@@ -13,7 +13,7 @@ nltk.download('punkt')
 # Load Pretrained Job Keywords
 @st.cache_resource
 def load_keywords():
-    with open("./lllm-resume-optimizer/models/category_keywords.pkl", "rb") as file:
+    with open("./models/category_keywords.pkl", "rb") as file:
         category_keywords = pickle.load(file)
     return category_keywords
 
