@@ -1,4 +1,4 @@
-import streamlit as st
+import scripts.deep.streamlit as st
 import pandas as pd
 import re
 import pickle
