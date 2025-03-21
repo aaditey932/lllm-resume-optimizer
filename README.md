@@ -30,13 +30,24 @@ This approach fine-tunes the **LLaMA 3 (3B Instruct)** model using **LoRA** on t
 ### **🔹 Streamlit Web App**  
 - **Upload your resume** (`.pdf`, `.docx`) and enter a job description.  
 - View **resume match score** and suggested **improvements**.  
-- **Update**
+- View **ML analytics using 4 features** as well as the predicted label using GMM and XGBoost predictions to determine percetage match
+
 
 ---
 
 ## **Setup**  
-Run the setup script to install dependencies and prepare the environment:  
-- **Update**
+Run the setup script to install dependencies and prepare the environment:
+```
+cd lllm-resume-optimizer
+```
+
+```
+chmod +x setup.sh
+```
+
+```
+./setup.sh 
+```
 
 ---
 

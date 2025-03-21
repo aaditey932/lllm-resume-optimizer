@@ -4,8 +4,8 @@ echo "Setting up Resume Optimizer environment..."
 
 # Create virtual environment if it doesn't exist
 if [ ! -d "venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv venv
+    echo "Creating virtual environment with Python 3.11..."
+    python3.10 -m venv venv
 fi
 
 # Activate virtual environment
@@ -18,7 +18,11 @@ pip install --upgrade pip
 
 # Install dependencies
 echo "Installing dependencies..."
-pip install -r requirements.txt
+if ! pip install -r requirements.txt; then
+    echo "Error: Failed to install requirements. Please check the error messages above."
+    echo "You may need to modify requirements.txt or use a different Python version."
+    exit 1
+fi
 
 # Download NLTK resources
 echo "Downloading NLTK resources..."
