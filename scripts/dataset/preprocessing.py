@@ -197,3 +197,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# This script was created using ChatGPT-4o and cursor. The code was first written and finalized in a notebook format. 
+# Then ChatGPT was asked to convert the code into a functional and working script. 
