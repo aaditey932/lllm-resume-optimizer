@@ -64,6 +64,7 @@ def generate_suggestions(resume_text, job_description):
     except (json.JSONDecodeError, TypeError):
         print("❌ Warning: API response is not a valid JSON object.")
         return None
+    
 def replace_text_preserve_formatting(doc, old_text, new_text):
     """
     Replace `old_text` with `new_text` in the document while preserving all formatting.
