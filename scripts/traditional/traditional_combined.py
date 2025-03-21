@@ -36,8 +36,10 @@ from sklearn.metrics import mean_absolute_error, r2_score
 
 # Configuration
 
-# Set paths
-PROJECT_ROOT = "/Users/owaiskamdar/Desktop/resume_optimizer/lllm-resume-optimizer"
+# Set paths using relative references
+# Determine the project root relative to this script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, "../.."))  # Go up two levels from script
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 INPUT_PATH = os.path.join(DATA_DIR, "outputs/matched_resumes_jobs.csv")
 FEATURES_PATH = os.path.join(DATA_DIR, "outputs/matched_resumes_jobs_withfeatures.csv")
