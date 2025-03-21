@@ -97,7 +97,3 @@ This project uses publicly available datasets to enhance resume optimization:
 ## **Ethics Statement**  
 
 This project uses publicly available datasets in compliance with their terms of use. We ensure that all data is handled responsibly, avoiding any misuse, unauthorized distribution, or unethical applications. No personally identifiable information (PII) is collected or used, and we strive to mitigate bias in AI-driven resume analysis. Our goal is to enhance fair and transparent hiring processes while respecting data privacy and ethical AI principles.
-
----
-
-This version adds the **Streamlit app link at the start and under the UI section** while keeping everything structured and clean. 🚀 Let me know if you need further refinements!
