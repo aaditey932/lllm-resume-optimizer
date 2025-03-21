@@ -80,7 +80,7 @@ python -m spacy download en_core_web_sm
 ```
 Then, run the app:  
 ```bash
-streamlit run app.py
+streamlit run main.py
 ```
 
 ---
@@ -97,3 +97,10 @@ This project uses publicly available datasets to enhance resume optimization:
 ## **Ethics Statement**  
 
 This project uses publicly available datasets in compliance with their terms of use. We ensure that all data is handled responsibly, avoiding any misuse, unauthorized distribution, or unethical applications. No personally identifiable information (PII) is collected or used, and we strive to mitigate bias in AI-driven resume analysis. Our goal is to enhance fair and transparent hiring processes while respecting data privacy and ethical AI principles.
+
+---
+
+## **📑 Presentation**
+Check out our **project presentation** on Canva:  
+[View Presentation](https://www.canva.com/design/DAGiTmYDpf4/NM1qK8Bh82vY5KtxPVXdMQ/edit)
+
