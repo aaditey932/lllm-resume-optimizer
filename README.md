@@ -80,7 +80,7 @@ python -m spacy download en_core_web_sm
 ```
 Then, run the app:  
 ```bash
-streamlit run app.py
+streamlit run main.py
 ```
 
 ---
@@ -100,4 +100,7 @@ This project uses publicly available datasets in compliance with their terms of 
 
 ---
 
-This version adds the **Streamlit app link at the start and under the UI section** while keeping everything structured and clean. 🚀 Let me know if you need further refinements!
+## **📑 Presentation**
+Check out our **project presentation** on Canva:  
+[View Presentation](https://www.canva.com/design/DAGiTmYDpf4/NM1qK8Bh82vY5KtxPVXdMQ/edit)
+
