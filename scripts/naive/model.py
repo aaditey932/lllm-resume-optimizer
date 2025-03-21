@@ -13,7 +13,7 @@ nltk.download('stopwords')
 nltk.download('punkt')
 
 # 📌 Define model directory
-model_dir = "./lllm-resume-optimizer/models"
+model_dir = "./models"
 os.makedirs(model_dir, exist_ok=True)
 
 # 📌 Step 1: Download Dataset from Kaggle
