@@ -266,4 +266,4 @@ if uploaded_file:
                     st.write(f"{match_scores['xgb_score']:.1f}%")
 
 
-## Above code generated using the DeepSeek & Chatgpt and then tweaked. 
+## Above code generated using the DeepSeek & Chatgpt and then tweaked
