@@ -246,19 +246,16 @@ if uploaded_file:
                     # Compute similarity metrics
                     similarity_metrics = compute_similarity_metrics(job_description, resume_text)
                 
-
                 # Display metrics in a single column
                 st.write("**Similarity Metrics:**")
                 st.write(f"TF-IDF Cosine Similarity: {similarity_metrics['tfidf_cosine']:.3f}")
                 st.write(f"Jaccard Similarity: {similarity_metrics['jaccard']:.3f}")
                 st.write(f"BERT Semantic Similarity: {similarity_metrics['bert_similarity']:.3f}")
                 st.write(f"N-gram Overlap: {similarity_metrics['ngram_overlap']:.3f}")
-
                 
                 # Predict match score
                 match_scores = predict_match_score(similarity_metrics)
                 if match_scores:
-
                     # Display individual model scores with separate progress bars
                     st.write("**GMM Model Score:**")
                     st.progress(match_scores["gmm_score"] / 100)
@@ -268,3 +265,5 @@ if uploaded_file:
                     st.progress(match_scores["xgb_score"] / 100)
                     st.write(f"{match_scores['xgb_score']:.1f}%")
 
+
+## Above code generated using the DeepSeek & Chatgpt and then tweaked
